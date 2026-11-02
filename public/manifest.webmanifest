@@ -1,0 +1,10 @@
+{
+  "name": "个人健康管理",
+  "short_name": "健康管理",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#f3fbf4",
+  "theme_color": "#e7f8ec",
+  "lang": "zh-CN",
+  "icons": [{ "src": "/icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" }]
+}
