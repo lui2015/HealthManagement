@@ -1,3 +1,9 @@
+export const BASE = (import.meta.env.BASE_URL || '/').replace(/\/$/, '')
+
+export function withBase(path: string) {
+  return `${BASE}${path}`
+}
+
 export class ApiError extends Error {
   status: number
   constructor(status: number, message: string) {
@@ -23,7 +29,7 @@ export async function api<T>(path: string, init: RequestInit = {}): Promise<T> {
   headers.set('X-Client-Date', today())
   let response: Response
   try {
-    response = await fetch(path, { ...init, headers, credentials: 'include' })
+    response = await fetch(withBase(path), { ...init, headers, credentials: 'include' })
   } catch {
     throw new ApiError(0, '当前离线，暂时连不上个人服务')
   }
@@ -36,7 +42,7 @@ export async function api<T>(path: string, init: RequestInit = {}): Promise<T> {
 export function uploadReport(body: unknown, onProgress: (value: number) => void, signal?: AbortSignal) {
   return new Promise<{ user: import('./types').UserData; report: import('./types').Report }>((resolve, reject) => {
     const xhr = new XMLHttpRequest()
-    xhr.open('POST', '/api/reports')
+    xhr.open('POST', withBase('/api/reports'))
     xhr.withCredentials = true
     xhr.setRequestHeader('Content-Type', 'application/json')
     xhr.setRequestHeader('X-Client-Date', today())
@@ -56,7 +62,7 @@ export function uploadReport(body: unknown, onProgress: (value: number) => void,
 }
 
 export async function downloadFile(path: string, filename: string) {
-  const response = await fetch(path, { credentials: 'include', headers: { 'X-Client-Date': today() } })
+  const response = await fetch(withBase(path), { credentials: 'include', headers: { 'X-Client-Date': today() } })
   if (!response.ok) throw new ApiError(response.status, '导出失败')
   const blob = await response.blob()
   const url = URL.createObjectURL(blob)

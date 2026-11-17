@@ -1,3 +1,4 @@
+import 'dotenv/config'
 import express from 'express'
 import fs from 'fs'
 import os from 'os'
@@ -366,9 +367,12 @@ function localAdmin(req) {
 }
 
 function assertAdmin(req) {
+  const username = process.env.ADMIN_USERNAME
   const password = process.env.ADMIN_PASSWORD
-  if (password) {
-    if (req.get('x-admin-password') !== password) throw httpError(401, '管理密码不正确')
+  if (username || password) {
+    const usernameOk = !username || req.get('x-admin-username') === username
+    const passwordOk = !password || req.get('x-admin-password') === password
+    if (!usernameOk || !passwordOk) throw httpError(401, '管理账号或密码不正确')
     return
   }
   if (!localAdmin(req)) throw httpError(403, '仅本机可以管理学习内容')

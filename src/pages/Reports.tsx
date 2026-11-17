@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
-import { api, uploadReport } from '../api'
+import { api, uploadReport, withBase } from '../api'
 import { useApp } from '../state'
 import type { Report, ReportItem, UserData } from '../types'
 import { Empty, Field } from '../ui'
@@ -113,10 +113,10 @@ export function ReportDetail() {
       <div className="split-report">
         <section className="card stack">
           <h2>原件</h2>
-          {report.mime === 'application/pdf' && <iframe title="报告预览" src={`/api/reports/${report.id}/file`} style={{ width: '100%', minHeight: 420, border: 0 }} />}
-          {report.mime.startsWith('image/') && report.mime !== 'image/heic' && <img alt={report.title} src={`/api/reports/${report.id}/file`} />}
+          {report.mime === 'application/pdf' && <iframe title="报告预览" src={withBase(`/api/reports/${report.id}/file`)} style={{ width: '100%', minHeight: 420, border: 0 }} />}
+          {report.mime.startsWith('image/') && report.mime !== 'image/heic' && <img alt={report.title} src={withBase(`/api/reports/${report.id}/file`)} />}
           {(report.mime === 'image/heic' || report.status === 'parse_failed') && <p className="muted">自动识别没有得到可用结果。可以预览原件后逐条填写，或粘贴文本识别。</p>}
-          <a className="btn btn-ghost" href={`/api/reports/${report.id}/file`}>下载原件</a>
+          <a className="btn btn-ghost" href={withBase(`/api/reports/${report.id}/file`)}>下载原件</a>
           <Field label="标题"><input value={report.title} onChange={(event) => patch({ title: event.target.value })} /></Field>
           <Field label="体检日期"><input type="date" value={report.examDate} onChange={(event) => patch({ examDate: event.target.value })} /></Field>
           <Field label="机构"><input value={report.org} onChange={(event) => patch({ org: event.target.value })} /></Field>
