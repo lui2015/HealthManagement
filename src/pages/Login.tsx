@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import { Navigate } from 'react-router-dom'
 import { api } from '../api'
 import { useApp } from '../state'
@@ -10,33 +10,15 @@ export function Login() {
   const [mode, setMode] = useState<'login' | 'register'>('login')
   const [phone, setPhone] = useState('')
   const [password, setPassword] = useState('')
-  const [code, setCode] = useState('')
-  const [devCode, setDevCode] = useState('')
-  const [notice, setNotice] = useState('')
   const [error, setError] = useState('')
-  const [wait, setWait] = useState(0)
-
-  useEffect(() => {
-    if (!wait) return
-    const timer = window.setTimeout(() => setWait((value) => value - 1), 1000)
-    return () => window.clearTimeout(timer)
-  }, [wait])
 
   if (user) return <Navigate to="/" replace />
-
-  async function sendCode() {
-    setError('')
-    const result = await api<{ devCode: string; message: string }>('/api/auth/code', { method: 'POST', body: JSON.stringify({ phone }) })
-    setDevCode(result.devCode)
-    setNotice(result.message)
-    setWait(60)
-  }
 
   async function submit() {
     setError('')
     try {
       const path = mode === 'register' ? '/api/auth/register' : '/api/auth/login'
-      const result = await api<{ user: UserData; meta: Meta }>(path, { method: 'POST', body: JSON.stringify({ phone, password, code }) })
+      const result = await api<{ user: UserData; meta: Meta }>(path, { method: 'POST', body: JSON.stringify({ phone, password }) })
       setUser(result.user)
     } catch (caught) {
       setError(caught instanceof Error ? caught.message : '登录失败')
@@ -58,15 +40,8 @@ export function Login() {
           <button type="button" className={mode === 'login' ? 'on' : ''} onClick={() => setMode('login')}>登录</button>
           <button type="button" className={mode === 'register' ? 'on' : ''} onClick={() => setMode('register')}>注册</button>
         </div>
-        <Field label="手机号"><input inputMode="numeric" autoComplete="username" value={phone} onChange={(event) => setPhone(event.target.value)} placeholder="11 位手机号" /></Field>
-        <div className="row">
-          <button className="btn btn-ghost" type="button" disabled={wait > 0} onClick={sendCode}>{wait > 0 ? `${wait} 秒后可重发` : '获取验证码'}</button>
-          {devCode && <span className="pill">本机验证码 {devCode}</span>}
-        </div>
-        {notice && <p className="disclaimer">{notice}</p>}
-        <Field label="验证码"><input inputMode="numeric" value={code} onChange={(event) => setCode(event.target.value)} /></Field>
-        <Field label="密码"><input type="password" autoComplete={mode === 'register' ? 'new-password' : 'current-password'} value={password} onChange={(event) => setPassword(event.target.value)} placeholder="至少 8 位，含字母和数字" /></Field>
-        {mode === 'login' && <p className="disclaimer">登录可以用密码，也可以只用验证码。</p>}
+        <Field label="账号（手机号）"><input inputMode="numeric" autoComplete="username" value={phone} onChange={(event) => setPhone(event.target.value)} placeholder="11 位手机号" /></Field>
+        <Field label="密码"><input type="password" autoComplete={mode === 'register' ? 'new-password' : 'current-password'} value={password} onChange={(event) => setPassword(event.target.value)} placeholder={mode === 'register' ? '至少 8 位，含字母和数字' : '请输入密码'} /></Field>
         {error && <div className="banner banner-warn">{error}</div>}
         <button className="btn btn-primary" type="submit">{mode === 'register' ? '注册并进入' : '登录'}</button>
         <Disclaimer />

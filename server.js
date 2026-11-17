@@ -26,7 +26,6 @@ const emptyDb = () => ({
   users: {},
   phoneIndex: {},
   sessions: {},
-  pendingVerify: {},
   unpublishedArticleIds: [],
   articleEdits: {},
   extraArticles: [],
@@ -87,10 +86,6 @@ function clientDate(req) {
 
 function hashPassword(password, salt) {
   return crypto.scryptSync(password, salt, 32).toString('hex')
-}
-
-function hashCode(phone, code) {
-  return crypto.createHash('sha256').update(`${phone}:${code}`).digest('hex')
 }
 
 function validPhone(phone) {
@@ -239,18 +234,9 @@ function markFailure(user) {
     error.save = true
     throw error
   }
-  const error = httpError(400, '手机号、验证码或密码不正确')
+  const error = httpError(400, '手机号或密码不正确')
   error.save = true
   throw error
-}
-
-function consumeCode(db, phone, code) {
-  const slot = db.pendingVerify[phone]
-  if (!slot || !slot.codeHash || slot.expireAt < Date.now() || slot.codeHash !== hashCode(phone, String(code || ''))) {
-    return false
-  }
-  delete slot.codeHash
-  return true
 }
 
 function publishedArticles(db) {
@@ -440,31 +426,11 @@ app.use((error, _req, res, next) => {
 
 app.get('/api/meta', handle(async () => llmMeta()))
 
-app.post('/api/auth/code', handle((req) => withDb(async (db) => {
-  const phone = String(req.body.phone || '')
-  if (!validPhone(phone)) throw httpError(400, '请输入 11 位手机号')
-  const today = clientDate(req)
-  const now = Date.now()
-  let slot = db.pendingVerify[phone]
-  if (!slot || slot.day !== today) slot = { count: 0, day: today, sentAt: 0 }
-  if (slot.sentAt && now - slot.sentAt < 60000) throw httpError(429, '验证码已发送，请 60 秒后再获取')
-  if (slot.count >= 10) throw httpError(429, '今日验证码次数已用完，明天可以再获取')
-  const code = String(Math.floor(100000 + Math.random() * 900000))
-  slot.count += 1
-  slot.sentAt = now
-  slot.expireAt = now + 5 * 60 * 1000
-  slot.codeHash = hashCode(phone, code)
-  slot.day = today
-  db.pendingVerify[phone] = slot
-  return { sent: true, devCode: code, message: '当前是个人本机版，验证码显示在页面上，不会发送真实短信。' }
-})))
-
 app.post('/api/auth/register', handle((req, res) => withDb(async (db) => {
   const phone = String(req.body.phone || '')
   if (!validPhone(phone)) throw httpError(400, '请输入 11 位手机号')
   if (!validPassword(req.body.password)) throw httpError(400, '密码至少 8 位，并同时包含字母和数字')
   if (db.phoneIndex[phone]) throw httpError(400, '这个手机号已注册，请直接登录')
-  if (!consumeCode(db, phone, req.body.code)) throw httpError(400, '验证码不正确或已过期')
   const user = blankUser(phone, req.body.password)
   db.users[user.id] = user
   db.phoneIndex[phone] = user.id
@@ -479,11 +445,10 @@ app.post('/api/auth/register', handle((req, res) => withDb(async (db) => {
 app.post('/api/auth/login', handle((req, res) => withDb(async (db) => {
   const phone = String(req.body.phone || '')
   const user = db.users[db.phoneIndex[phone] || '']
-  if (!user) throw httpError(400, '手机号、验证码或密码不正确')
+  if (!user) throw httpError(400, '手机号或密码不正确')
   assertLoginAllowed(user)
-  const codeOk = req.body.code ? consumeCode(db, phone, req.body.code) : false
   const passwordOk = req.body.password ? hashPassword(req.body.password, user.salt) === user.passwordHash : false
-  if (!codeOk && !passwordOk) markFailure(user)
+  if (!passwordOk) markFailure(user)
   user.failedLogins = 0
   user.lockUntil = 0
   const token = crypto.randomBytes(24).toString('hex')
