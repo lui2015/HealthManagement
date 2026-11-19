@@ -1,4 +1,4 @@
-import { NavLink, Navigate, Outlet, Route, Routes, useLocation } from 'react-router-dom'
+import { Link, NavLink, Navigate, Outlet, Route, Routes, useLocation } from 'react-router-dom'
 import { useState } from 'react'
 import { api } from './api'
 import { Recorder } from './Recorder'
@@ -14,73 +14,118 @@ import { Me } from './pages/Me'
 import { MetricDetail, Metrics } from './pages/Metrics'
 import { ReportDetail, Reports } from './pages/Reports'
 import { Home } from './pages/Home'
+import { GuestHome } from './pages/GuestHome'
 
 const tabs = [
-  { to: '/', label: '首页', icon: icons.home, end: true },
-  { to: '/metrics', label: '指标', icon: icons.metric },
-  { to: '/reports', label: '报告', icon: icons.report },
-  { to: '/habits', label: '习惯', icon: icons.habit },
-  { to: '/learn', label: '学习', icon: icons.learn },
+  { to: '/', label: '首页', icon: icons.home, end: true, auth: false },
+  { to: '/metrics', label: '指标', icon: icons.metric, auth: true },
+  { to: '/reports', label: '报告', icon: icons.report, auth: true },
+  { to: '/habits', label: '习惯', icon: icons.habit, auth: true },
+  { to: '/learn', label: '学习', icon: icons.learn, auth: false },
 ]
 
 export function AppRoutes() {
   const { booting } = useApp()
-  if (booting) return <main className="auth"><p>正在打开你的健康记录…</p></main>
+  if (booting) return <main className="auth"><p>正在打开…</p></main>
   return (
     <Routes>
       <Route path="/login" element={<Login />} />
       <Route path="/admin" element={<Admin />} />
       <Route element={<Shell />}>
-        <Route path="/" element={<Home />} />
-        <Route path="/metrics" element={<Metrics />} />
-        <Route path="/metrics/:id" element={<MetricDetail />} />
-        <Route path="/reports" element={<Reports />} />
-        <Route path="/reports/:id" element={<ReportDetail />} />
-        <Route path="/analysis" element={<AnalysisHome />} />
-        <Route path="/analysis/:id" element={<AnalysisDetail />} />
-        <Route path="/habits" element={<Habits />} />
+        <Route path="/" element={<HomeGate />} />
+        <Route path="/metrics" element={<AuthRoute><Metrics /></AuthRoute>} />
+        <Route path="/metrics/:id" element={<AuthRoute><MetricDetail /></AuthRoute>} />
+        <Route path="/reports" element={<AuthRoute><Reports /></AuthRoute>} />
+        <Route path="/reports/:id" element={<AuthRoute><ReportDetail /></AuthRoute>} />
+        <Route path="/analysis" element={<AuthRoute><AnalysisHome /></AuthRoute>} />
+        <Route path="/analysis/:id" element={<AuthRoute><AnalysisDetail /></AuthRoute>} />
+        <Route path="/habits" element={<AuthRoute><Habits /></AuthRoute>} />
         <Route path="/learn" element={<Learn />} />
         <Route path="/learn/topic/:id" element={<TopicPage />} />
         <Route path="/learn/article/:id" element={<ArticlePage />} />
-        <Route path="/me" element={<Me />} />
+        <Route path="/me" element={<AuthRoute><Me /></AuthRoute>} />
       </Route>
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
   )
 }
 
+function HomeGate() {
+  const { user } = useApp()
+  return user ? <Home /> : <GuestHome />
+}
+
+function AuthRoute({ children }: { children: React.ReactNode }) {
+  const { user } = useApp()
+  if (user) return <>{children}</>
+  return <GuestOnlyNotice />
+}
+
+function GuestOnlyNotice() {
+  const { requireLogin } = useApp()
+  return (
+    <div className="page">
+      <section className="card stack" style={{ maxWidth: 560, margin: '0 auto' }}>
+        <h1>这部分是个人信息</h1>
+        <p className="muted">指标、报告、习惯、分析和我的档案属于你的私人健康记录。登录之后才能查看和管理。</p>
+        <p className="disclaimer">不想登录？首页和「学习」里的健康知识随时都能免费阅读。</p>
+        <div className="row">
+          <button className="btn btn-primary" onClick={() => requireLogin('登录后即可管理你的健康记录')}>登录 / 注册</button>
+          <Link className="btn btn-ghost" to="/">回到首页</Link>
+        </div>
+      </section>
+    </div>
+  )
+}
+
 function Shell() {
-  const { user, offline, recorder, logout } = useApp()
+  const { user, offline, recorder, logout, requireLogin } = useApp()
   const location = useLocation()
-  if (!user) return <Navigate to="/login" replace />
-  if (user.pendingDeletion) return <Pending />
+  if (user?.pendingDeletion) return <Pending />
   const title = titleOf(location.pathname)
+  const onTabClick = (event: React.MouseEvent, auth: boolean, label: string) => {
+    if (auth && !user) {
+      event.preventDefault()
+      requireLogin(`登录后即可查看和管理${label}`)
+    }
+  }
+  const renderTabs = () => tabs.map((tab) => (
+    <NavLink key={tab.to} to={tab.to} end={tab.end} onClick={(event) => onTabClick(event, tab.auth, tab.label)}>
+      <Icon d={tab.icon} />{tab.label}
+    </NavLink>
+  ))
   return (
     <div className="app">
       <aside className="side">
         <div className="brand"><Mascot size={44} /><span>小芽健康</span></div>
-        {tabs.map((tab) => <NavLink key={tab.to} to={tab.to} end={tab.end}><Icon d={tab.icon} />{tab.label}</NavLink>)}
-        <NavLink to="/analysis"><Icon d={icons.analysis} />分析</NavLink>
-        <NavLink to="/me"><Icon d={icons.me} />我的</NavLink>
+        {renderTabs()}
+        <NavLink to="/analysis" onClick={(event) => onTabClick(event, true, '分析')}><Icon d={icons.analysis} />分析</NavLink>
+        <NavLink to="/me" onClick={(event) => onTabClick(event, true, '我的')}><Icon d={icons.me} />我的</NavLink>
       </aside>
       <div className="main">
         <header className="topbar">
           <strong>{title}</strong>
           <div className="row">
-            <NavLink to="/me" className="icon-btn" aria-label="我的"><Icon d={icons.me} /></NavLink>
-            <button className="btn btn-ghost" onClick={() => logout()}>退出</button>
+            {user ? (
+              <>
+                <NavLink to="/me" className="icon-btn" aria-label="我的"><Icon d={icons.me} /></NavLink>
+                <button className="btn btn-ghost" onClick={() => logout()}>退出</button>
+              </>
+            ) : (
+              <Link className="btn btn-ghost" state={{ from: location.pathname + location.search }} to="/login">登录 / 注册</Link>
+            )}
           </div>
         </header>
         <div className="content">
-          {offline && <div className="banner">当前离线，显示的是上次打开的内容。新的指标会先记在本机。</div>}
+          {offline && user && <div className="banner">当前离线，显示的是上次打开的内容。新的指标会先记在本机。</div>}
           <Outlet />
         </div>
       </div>
       <nav className="tabbar">
-        {tabs.map((tab) => <NavLink key={tab.to} to={tab.to} end={tab.end}><Icon d={tab.icon} />{tab.label}</NavLink>)}
+        {renderTabs()}
       </nav>
-      {recorder && <Recorder />}
-      {!user.profile.onboardingDone && <Onboarding />}
+      {recorder && user && <Recorder />}
+      {user && !user.profile.onboardingDone && <Onboarding />}
     </div>
   )
 }

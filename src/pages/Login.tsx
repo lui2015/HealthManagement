@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Navigate } from 'react-router-dom'
+import { Navigate, useLocation } from 'react-router-dom'
 import { api } from '../api'
 import { useApp } from '../state'
 import type { Meta, UserData } from '../types'
@@ -7,12 +7,14 @@ import { Disclaimer, Field, Mascot } from '../ui'
 
 export function Login() {
   const { user, setUser } = useApp()
+  const location = useLocation()
+  const from = (location.state as { from?: string } | null)?.from
   const [mode, setMode] = useState<'login' | 'register'>('login')
   const [phone, setPhone] = useState('')
   const [password, setPassword] = useState('')
   const [error, setError] = useState('')
 
-  if (user) return <Navigate to="/" replace />
+  if (user) return <Navigate to={from && from !== '/login' ? from : '/'} replace />
 
   async function submit() {
     setError('')

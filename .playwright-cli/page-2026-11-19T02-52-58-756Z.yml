@@ -1,0 +1,125 @@
+- generic [ref=e3]:
+  - complementary [ref=e4]:
+    - generic [ref=e5]:
+      - img [ref=e6]
+      - generic [ref=e19]: 小芽健康
+    - link "首页" [ref=e20] [cursor=pointer]:
+      - /url: /
+      - img [ref=e21]
+      - text: 首页
+    - link "指标" [ref=e23] [cursor=pointer]:
+      - /url: /metrics
+      - img [ref=e24]
+      - text: 指标
+    - link "报告" [ref=e26] [cursor=pointer]:
+      - /url: /reports
+      - img [ref=e27]
+      - text: 报告
+    - link "习惯" [ref=e29] [cursor=pointer]:
+      - /url: /habits
+      - img [ref=e30]
+      - text: 习惯
+    - link "学习" [ref=e32] [cursor=pointer]:
+      - /url: /learn
+      - img [ref=e33]
+      - text: 学习
+    - link "分析" [ref=e35] [cursor=pointer]:
+      - /url: /analysis
+      - img [ref=e36]
+      - text: 分析
+    - link "我的" [ref=e38] [cursor=pointer]:
+      - /url: /me
+      - img [ref=e39]
+      - text: 我的
+  - generic [ref=e41]:
+    - banner [ref=e42]:
+      - strong [ref=e43]: 学习
+      - link "登录 / 注册" [ref=e45] [cursor=pointer]:
+        - /url: /login
+    - generic [ref=e47]:
+      - heading "学习" [level=1] [ref=e48]
+      - textbox "搜索分类、专题或标题" [ref=e49]
+      - generic [ref=e50]:
+        - heading "今日一条" [level=2] [ref=e52]
+        - heading "体检报告在说什么" [level=3] [ref=e53]
+        - paragraph [ref=e54]: 先分清原件、参考范围和箭头，再决定要不要问医生。
+        - generic [ref=e55]:
+          - link "阅读" [ref=e56] [cursor=pointer]:
+            - /url: /learn/article/report-1
+          - button "换一条" [ref=e57] [cursor=pointer]
+      - generic [ref=e58]:
+        - generic [ref=e59]:
+          - heading "饮食" [level=2] [ref=e60]
+          - button "想多看这类" [ref=e61] [cursor=pointer]
+        - link "一盘饭可以怎样搭配4 分钟" [ref=e62] [cursor=pointer]:
+          - /url: /learn/article/diet-1
+      - generic [ref=e63]:
+        - generic [ref=e64]:
+          - heading "运动" [level=2] [ref=e65]
+          - button "想多看这类" [ref=e66] [cursor=pointer]
+        - link "把运动写成能重复的 30 分钟4 分钟" [ref=e67] [cursor=pointer]:
+          - /url: /learn/article/sport-1
+      - generic [ref=e68]:
+        - generic [ref=e69]:
+          - heading "睡眠" [level=2] [ref=e70]
+          - button "想多看这类" [ref=e71] [cursor=pointer]
+        - link "睡眠与作息 0/5 用时长和作息记录一个星期，而不是评判某一个晚上。" [ref=e72] [cursor=pointer]:
+          - /url: /learn/topic/topic-sleep
+          - generic [ref=e73]:
+            - strong [ref=e74]: 睡眠与作息
+            - generic [ref=e75]: 0/5
+          - paragraph [ref=e76]: 用时长和作息记录一个星期，而不是评判某一个晚上。
+      - generic [ref=e78]:
+        - generic [ref=e79]:
+          - heading "体重与代谢" [level=2] [ref=e80]
+          - button "想多看这类" [ref=e81] [cursor=pointer]
+        - link "体重和 BMI 怎么一起看4 分钟" [ref=e82] [cursor=pointer]:
+          - /url: /learn/article/weight-1
+      - generic [ref=e83]:
+        - generic [ref=e84]:
+          - heading "血压与心血管" [level=2] [ref=e85]
+          - button "想多看这类" [ref=e86] [cursor=pointer]
+        - link "血压的日常记录 0/5 在家测量、两个数字分别是什么，以及备注里写什么。" [ref=e87] [cursor=pointer]:
+          - /url: /learn/topic/topic-bp
+          - generic [ref=e88]:
+            - strong [ref=e89]: 血压的日常记录
+            - generic [ref=e90]: 0/5
+          - paragraph [ref=e91]: 在家测量、两个数字分别是什么，以及备注里写什么。
+      - generic [ref=e93]:
+        - generic [ref=e94]:
+          - heading "血糖" [level=2] [ref=e95]
+          - button "想多看这类" [ref=e96] [cursor=pointer]
+        - link "血糖记录入门 0/5 把空腹、餐后和随机分开记，并知道何时该联系医生。" [ref=e97] [cursor=pointer]:
+          - /url: /learn/topic/topic-glu
+          - generic [ref=e98]:
+            - strong [ref=e99]: 血糖记录入门
+            - generic [ref=e100]: 0/5
+          - paragraph [ref=e101]: 把空腹、餐后和随机分开记，并知道何时该联系医生。
+      - generic [ref=e103]:
+        - generic [ref=e104]:
+          - heading "体检报告怎么看" [level=2] [ref=e105]
+          - button "想多看这类" [ref=e106] [cursor=pointer]
+        - link "读懂体检报告 0/5 从原件、箭头、参考范围到就诊时可以问的问题。" [ref=e107] [cursor=pointer]:
+          - /url: /learn/topic/topic-report
+          - generic [ref=e108]:
+            - strong [ref=e109]: 读懂体检报告
+            - generic [ref=e110]: 0/5
+          - paragraph [ref=e111]: 从原件、箭头、参考范围到就诊时可以问的问题。
+      - generic [ref=e113]:
+        - generic [ref=e114]:
+          - heading "用药常识" [level=2] [ref=e115]
+          - button "想多看这类" [ref=e116] [cursor=pointer]
+        - link "用药提醒只执行你已有的安排4 分钟" [ref=e117] [cursor=pointer]:
+          - /url: /learn/article/meds-1
+      - generic [ref=e118]:
+        - generic [ref=e119]:
+          - heading "情绪与压力" [level=2] [ref=e120]
+          - button "想多看这类" [ref=e121] [cursor=pointer]
+        - link "压力大的时候先把身体需要的事做小4 分钟" [ref=e122] [cursor=pointer]:
+          - /url: /learn/article/mood-1
+      - generic [ref=e123]:
+        - generic [ref=e124]:
+          - heading "季节与传染病预防" [level=2] [ref=e125]
+          - button "想多看这类" [ref=e126] [cursor=pointer]
+        - link "换季时把预防做成固定动作4 分钟" [ref=e127] [cursor=pointer]:
+          - /url: /learn/article/season-1

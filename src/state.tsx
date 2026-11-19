@@ -1,4 +1,5 @@
 import { createContext, useContext, useEffect, useMemo, useState, type ReactNode } from 'react'
+import { Link, useLocation } from 'react-router-dom'
 import { api, ApiError } from './api'
 import type { Catalog, Meta, UserData } from './types'
 
@@ -23,6 +24,7 @@ interface AppContextValue {
   closeRecorder: () => void
   confirm: (options: ConfirmOptions) => Promise<boolean>
   logout: () => Promise<void>
+  requireLogin: (reason?: string) => void
 }
 
 const AppContext = createContext<AppContextValue | null>(null)
@@ -45,6 +47,8 @@ export function AppState({ children }: { children: ReactNode }) {
   const [message, setMessage] = useState('')
   const [recorder, setRecorder] = useState<{ metricId?: string; recordId?: string } | null>(null)
   const [confirmState, setConfirmState] = useState<(ConfirmOptions & { resolve: (value: boolean) => void }) | null>(null)
+  const [loginHint, setLoginHint] = useState('')
+  const location = useLocation()
 
   function remember(next: UserData | null) {
     setUserState(next)
@@ -126,7 +130,8 @@ export function AppState({ children }: { children: ReactNode }) {
       sessionStorage.removeItem(QUEUE_KEY)
       remember(null)
     },
-  }), [user, meta, content, booting, offline, recorder])
+    requireLogin: (reason) => setLoginHint(reason || '登录后才能管理你的健康信息'),
+  }), [user, meta, content, booting, offline, recorder, location.pathname])
 
   return (
     <AppContext.Provider value={value}>
@@ -140,6 +145,23 @@ export function AppState({ children }: { children: ReactNode }) {
             <div className="row">
               <button className="btn btn-ghost" onClick={() => { confirmState.resolve(false); setConfirmState(null) }}>取消</button>
               <button className={`btn ${confirmState.danger ? 'btn-danger' : 'btn-primary'}`} onClick={() => { confirmState.resolve(true); setConfirmState(null) }}>{confirmState.confirmText || '确定'}</button>
+            </div>
+          </div>
+        </div>
+      )}
+      {loginHint && (
+        <div className="sheet" role="dialog" aria-modal="true" aria-label="需要登录">
+          <div className="sheet-card stack">
+            <h2>需要登录</h2>
+            <p className="muted">{loginHint}。登录后会回到这里。</p>
+            <div className="row">
+              <button className="btn btn-ghost" onClick={() => setLoginHint('')}>先不登录</button>
+              <Link
+                className="btn btn-primary"
+                state={{ from: location.pathname + location.search }}
+                to="/login"
+                onClick={() => setLoginHint('')}
+              >去登录 / 注册</Link>
             </div>
           </div>
         </div>
