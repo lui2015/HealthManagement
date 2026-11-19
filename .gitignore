@@ -4,3 +4,6 @@ data
 .DS_Store
 *.local
 .env
+.playwright-cli/
+guest.yaml
+metrics.yaml
